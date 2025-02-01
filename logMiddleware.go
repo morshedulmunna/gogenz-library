@@ -7,20 +7,23 @@ import (
 	"time"
 )
 
-// LoggingMiddleware logs each incoming request
+// LoggingMiddleware logs each incoming request with method, URL, and response time
 func LoggingMiddleware(next http.Handler) http.Handler {
+	logger := log.New(os.Stdout, "HTTP: ", log.LstdFlags)
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Capture the start time
 		start := time.Now()
 
 		// Log request details
-		log.Printf("Request received: %s %s", r.Method, r.URL.Path)
+		logger.Printf("Request received: %s %s", r.Method, r.URL.Path)
 
 		// Call the next handler
 		next.ServeHTTP(w, r)
 
-		// Log the response time and method
-		log.Printf("Request %s %s took %v", r.Method, r.URL.Path, time.Since(start))
+		// Calculate and log the response time
+		duration := time.Since(start)
+		logger.Printf("Request processed: %s %s in %v", r.Method, r.URL.Path, duration)
 	})
 }
 
